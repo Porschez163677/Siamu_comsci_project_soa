@@ -89,7 +89,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: Porschez163677/project_ecom:latest
+          tags: suttipong2546/project_ecom:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
