@@ -120,8 +120,8 @@ jobs:
             sudo apt update
             sudo apt install docker.io -y
             sudo systemctl start docker
-            docker-compose pull
-            docker-compose up -d --build
+            docker compose pull
+            docker compose up -d --build
           EOF
         
 
