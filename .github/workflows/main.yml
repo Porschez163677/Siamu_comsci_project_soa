@@ -106,22 +106,29 @@ jobs:
           echo "$SSH_KEY" | base64 -d > key.pem
           chmod 600 key.pem
         env:
-          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KEY: ${{ secrets.DO_SSH_KEY }}
 
       - name: Connect & Deploy
-        run: |
-          ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.DROPLET_USER }}@${{ secrets.DROPLET_IP }} << 'EOF'
-            cd /root || mkdir -p /root && cd /root
-            rm -rf Siamu_comsci_project_soa
-            git clone https://github.com/Porschez163677/Siamu_comsci_project_soa.git
-            cd Siamu_comsci_project_soa
-            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-            sudo apt update
-            sudo apt install docker.io -y
-            sudo systemctl start docker
-            docker compose pull
-            docker compose up -d --build
-          EOF
+  run: |
+    ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.DROPLET_USER }}@${{ secrets.DROPLET_IP }} << 'EOF'
+      cd /root || mkdir -p /root && cd /root
+      rm -rf Siamu_comsci_project_soa
+      git clone https://github.com/Porschez163677/Siamu_comsci_project_soa.git
+      cd Siamu_comsci_project_soa
+      
+      sudo apt update
+      sudo apt install docker.io -y
+      sudo systemctl start docker
+
+      # ✅ ติดตั้ง docker-compose v1.29.2
+      sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" \
+        -o /usr/local/bin/docker-compose
+      sudo chmod +x /usr/local/bin/docker-compose
+
+      # ✅ รัน
+      docker-compose pull
+      docker-compose up -d --build
+    EOF
+
         
 
