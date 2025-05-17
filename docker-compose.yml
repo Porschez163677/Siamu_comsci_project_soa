@@ -1,59 +1,57 @@
 version: '3.8'
 
 services:
-  # FastAPI application
-  backend:
-    image: suttipong2546/project_ecom:latest
-    container_name: fastapi_app
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-    environment:
-      - DB_HOST=db  # Using the service name as the host
-      - DB_USER=root
-      - DB_PASSWORD=1111
-      - DB_NAME=ecom_db
-    volumes:
-      - ./uploads:/app/uploads  # Persist uploads folder
-    # Wait for MySQL to be ready before starting
-    command: >
-      sh -c "
-        echo 'Waiting for MySQL to be ready...'
-        while ! nc -z db 3306; do
-          sleep 1
-        done
-        echo 'MySQL is ready!'
-        uvicorn main:app --host 0.0.0.0 --port 8000
-      "
-
   # MySQL database
   db:
     image: mysql:5.7
     platform: linux/amd64
-    container_name: db_mysql2
-    ports:
-      - "3306:3306"
+    restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=1111
-      - MYSQL_DATABASE=ecom_db
+      MYSQL_ROOT_PASSWORD: 1111
+      MYSQL_DATABASE: ecom_db
     volumes:
-      - mysql_data:/var/lib/mysql  # Persist database data
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql  # Initialize database with schema.sql
+      - mysql_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
 
-  # phpMyAdmin (optional)
+  # phpMyAdmin
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     platform: linux/amd64
-    container_name: db_phpmyadmin2
+    restart: always
     ports:
-      - "8888:80"
+      - "8080:80"
     environment:
-      - PMA_HOST=db
-      - PMA_USER=root
-      - PMA_PASSWORD=1111
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: 1111
     depends_on:
       - db
 
+  # FastAPI Backend
+  backend:
+    image: suttipong2546/project_ecom:latest
+    platform: linux/amd64
+    restart: always
+    ports:
+      - "80:8000"  # เปิดหน้าเว็บได้ที่ http://<ip>
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=1111
+      - DB_NAME=ecom_db
+    volumes:
+      - ./uploads:/app/uploads
+    command: >
+      sh -c "
+        echo 'Waiting for MySQL to be ready...' &&
+        while ! nc -z db 3306; do
+          sleep 1
+        done &&
+        echo 'MySQL is ready!' &&
+        uvicorn main:app --host 0.0.0.0 --port 8000
+      "
+
 volumes:
-  mysql_data:  # Named volume for MySQL data persistence
+  mysql_data:
