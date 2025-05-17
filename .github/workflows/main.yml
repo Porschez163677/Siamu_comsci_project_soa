@@ -114,14 +114,14 @@ jobs:
             cd /root || mkdir -p /root && cd /root
             rm -rf project_ecom
             git clone https://github.com/Porschez163677/Siamu_comsci_project_soa.git
-            cd project_ecom
+            cd Siamu_comsci_project_soa
             sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
             sudo chmod +x /usr/local/bin/docker-compose
             sudo apt update
             sudo apt install docker.io -y
             sudo systemctl start docker
             docker-compose pull
-            docker-compose up -d
+            docker-compose up -d --build
           EOF
         
 
